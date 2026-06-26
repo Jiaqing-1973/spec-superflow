@@ -1,7 +1,7 @@
 {
   "name": "spec-superflow",
-  "version": "0.1.0",
-  "description": "Spec-first workflow plugin: clarified requirements → execution contract → disciplined implementation",
+  "version": "0.2.0",
+  "description": "Spec-first workflow: integrates OpenSpec planning engine + Superpowers execution discipline. 9 collaborative skills with embedded TDD, SDD, code review, debugging, and delta spec sync.",
   "source": "./",
   "author": {
     "name": "MageByte",
@@ -15,8 +15,13 @@
     "skills",
     "spec-driven-development",
     "tdd",
+    "sdd",
     "contract-driven",
+    "code-review",
+    "debugging",
+    "spec-sync",
     "claude-code",
+    "cursor",
     "trae"
   ],
   "skills": "./skills/"

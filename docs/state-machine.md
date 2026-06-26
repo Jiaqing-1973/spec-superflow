@@ -9,16 +9,21 @@
 - intent is still fuzzy
 - options are still being compared
 - no implementation is allowed
+- `spec-explorer` is active
 
 ### `specifying`
 
 - planning artifacts are being written or revised
 - proposal, specs, design, and tasks are refined
+- `spec-forger` is active
+- schema validation runs on every artifact generation
 
 ### `bridging`
 
 - planning artifacts are translated into `execution-contract.md`
 - ambiguity is compressed into explicit approved decisions
+- `bridge-contract` is active
+- parsing engine auto-extracts intent/scope/test-obligations/constraints/batches
 
 ### `approved-for-build`
 
@@ -29,20 +34,37 @@
 ### `executing`
 
 - implementation follows the execution contract
-- TDD, review gates, and escalation rules apply
+- TDD, SDD (subagent-driven), review gates, and escalation rules apply
+- `execution-governor` is active
+- `code-reviewer` invoked after each execution batch
+
+### `debugging`
+
+- execution has hit a bug, test failure, or unexpected behavior
+- `systematic-debugger` is active
+- 4-phase debugging (Root Cause → Pattern Analysis → Hypothesis → Implementation)
+- After debugging completes, returns to `executing`
 
 ### `closing`
 
-- verification is complete
+- verification is complete with evidence
+- `closure-archivist` is active
+- `verification-before-completion` gate enforced
+- `spec-syncer` invoked if delta specs need merging into main specs
 - the change can be summarized, archived, or handed off
 
 ## Transitions
 
 ```text
 exploring -> specifying -> bridging -> approved-for-build -> executing -> closing
-                        ^                                  |
-                        |                                  v
-                        +----------------------------------+
+                ^              ^             |                 ^    |
+                |              |             v                 |    |
+                |              |         debugging ────────────┘    |
+                |              |                                    |
+                |              +------------------------------------+
+                |              (contract drift → re-bridge)
+                +---------------------------------------------------+
+                     (scope change → re-specify)
 ```
 
 ## Mandatory Rewind
@@ -53,6 +75,16 @@ The workflow must move back to `specifying` or `bridging` when:
 - a critical interface changes
 - a key design assumption is wrong
 - current artifacts no longer define the intended behavior
+- `execution-contract.md` intent lock no longer matches `proposal.md` scope
+
+## Debugging State
+
+During `executing`, if a bug, test failure, or unexpected behavior blocks progress:
+
+1. Pause `executing` and enter `debugging`
+2. `systematic-debugger` performs 4-phase root cause analysis
+3. If root cause found → fix (with TDD) → return to `executing`
+4. If 3+ fix attempts fail → question architecture → escalate to user
 
 ## Anti-Pattern
 

@@ -1,0 +1,115 @@
+#!/usr/bin/env node
+// validate-artifacts - Validate spec-superflow artifacts
+// Usage: node scripts/validate-artifacts <change-dir>
+//
+// Reads a change directory and validates all artifacts found:
+//   - proposal.md (change content validation)
+//   - specs/*/spec.md (delta spec validation)
+
+import { readFileSync, readdirSync, existsSync, statSync } from 'fs';
+import { join, basename } from 'path';
+import { Validator, ValidationReport } from '../src/index.js';
+
+function findFiles(dir: string, pattern: RegExp): string[] {
+  const results: string[] = [];
+  if (!existsSync(dir)) return results;
+
+  const entries = readdirSync(dir);
+  for (const entry of entries) {
+    const full = join(dir, entry);
+    const st = statSync(full);
+    if (st.isDirectory()) {
+      results.push(...findFiles(full, pattern));
+    } else if (st.isFile() && pattern.test(entry)) {
+      results.push(full);
+    }
+  }
+  return results;
+}
+
+function printReport(label: string, report: ValidationReport): void {
+  console.log(`\n  📋 ${label}`);
+  if (report.valid) {
+    console.log(`     ✅ valid (${report.summary.errors} errors, ${report.summary.warnings} warnings, ${report.summary.info} info)`);
+  } else {
+    console.log(`     ❌ invalid (${report.summary.errors} errors, ${report.summary.warnings} warnings, ${report.summary.info} info)`);
+  }
+  for (const issue of report.issues) {
+    const icon = issue.level === 'ERROR' ? '🔴' : issue.level === 'WARNING' ? '🟡' : '🔵';
+    const lineInfo = issue.line ? `:${issue.line}` : '';
+    console.log(`     ${icon} [${issue.level}] ${issue.path}${lineInfo}: ${issue.message}`);
+  }
+}
+
+function main(): void {
+  const args = process.argv.slice(2);
+  if (args.length < 1) {
+    console.error('Usage: node scripts/validate-artifacts <change-dir>');
+    process.exit(2);
+  }
+
+  const changeDir = args[0];
+  if (!existsSync(changeDir) || !statSync(changeDir).isDirectory()) {
+    console.error(`Error: "${changeDir}" is not a valid directory`);
+    process.exit(2);
+  }
+
+  const changeName = basename(changeDir);
+  const validator = new Validator(false);
+
+  console.log(`🔍 Validating artifacts in: ${changeDir}`);
+  console.log(`   Change: ${changeName}`);
+
+  let hasErrors = false;
+
+  const proposalPath = join(changeDir, 'proposal.md');
+  if (existsSync(proposalPath)) {
+    try {
+      const content = readFileSync(proposalPath, 'utf-8');
+      const report = validator.validateChangeContent(changeName, content);
+      printReport('proposal.md (change content)', report);
+      if (!report.valid) hasErrors = true;
+    } catch (e) {
+      console.log(`\n  📋 proposal.md`);
+      console.log(`     ❌ Error reading file: ${e instanceof Error ? e.message : 'Unknown error'}`);
+      hasErrors = true;
+    }
+  } else {
+    console.log(`\n  ⚠️  proposal.md not found`);
+  }
+
+  const specsDir = join(changeDir, 'specs');
+  if (existsSync(specsDir)) {
+    const specFiles = findFiles(specsDir, /^spec\.md$/);
+    if (specFiles.length === 0) {
+      console.log(`\n  ⚠️  No spec.md files found in specs/`);
+    }
+    for (const specFile of specFiles) {
+      try {
+        const content = readFileSync(specFile, 'utf-8');
+        const report = validator.validateDeltaSpec(content);
+        const relative = specFile.replace(changeDir + '/', '');
+        printReport(`${relative} (delta spec)`, report);
+        if (!report.valid) hasErrors = true;
+      } catch (e) {
+        const relative = specFile.replace(changeDir + '/', '');
+        console.log(`\n  📋 ${relative}`);
+        console.log(`     ❌ Error reading file: ${e instanceof Error ? e.message : 'Unknown error'}`);
+        hasErrors = true;
+      }
+    }
+  } else {
+    console.log(`\n  ⚠️  specs/ directory not found`);
+  }
+
+  console.log('');
+  if (hasErrors) {
+    console.log('❌ Validation failed with errors.');
+    process.exit(1);
+  } else {
+    console.log('✅ All artifacts validated successfully.');
+    process.exit(0);
+  }
+}
+
+main();

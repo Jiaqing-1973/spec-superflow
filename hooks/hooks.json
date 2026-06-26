@@ -1,0 +1,8 @@
+{
+  "hooks": [
+    {
+      "event": "Startup|Clear|Compact",
+      "command": "bash hooks/session-start"
+    }
+  ]
+}

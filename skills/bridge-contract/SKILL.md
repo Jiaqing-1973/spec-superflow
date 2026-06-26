@@ -36,6 +36,48 @@ Read:
 
 Do not rely on chat memory as a substitute for these files.
 
+## Auto-Extraction via Artifact Parsing
+
+When available, use structured artifact parsing to auto-extract contract fields. This produces a more accurate and complete contract than manual copying.
+
+### Parse `proposal.md` for Intent & Scope
+
+Extract by parsing the proposal's structure:
+
+- **Intent Lock**: Read `## Why` section → compress into the "Problem being solved" field. Read `## What Changes` → compress into "In scope" list.
+- **Scope Fence**: Read `## Scope > ### Out of Scope` → directly populate the "Out of scope" field.
+- **Non-Goals**: Any explicit non-goals from the proposal → include verbatim.
+
+### Parse `specs/` for Test Obligations
+
+Extract by iterating through each spec file:
+
+- **Approved Requirements Summary**: For each requirement with SHALL/MUST, extract the requirement name and a one-sentence summary.
+- **Key Scenarios**: For each `#### Scenario:` block, extract the scenario name.
+- **Acceptance Checks**: Each scenario's THEN clause becomes an acceptance check.
+- **Test Obligations**: Any requirement that describes observable behavior → must start with a failing test.
+
+### Parse `design.md` for Constraints
+
+Extract by parsing the design's structure:
+
+- **Architecture Constraints**: Read `## Decisions` → each decision's "Choice" becomes a constraint.
+- **Interface Constraints**: Read `## Risks And Trade-Offs` → interface-related risks become constraints.
+- **Dependency Constraints**: Read `## Context > Constraints` → dependency-related items become constraints.
+- **Data Constraints**: Any data format, schema, or migration notes → capture as constraints.
+
+### Parse `tasks.md` for Batches
+
+Extract by parsing the task structure:
+
+- **Execution Batches**: Group numbered tasks by their major section (1.x → Batch 1, 2.x → Batch 2).
+- **Completion Definitions**: For each batch, derive "Done when" from the tasks' acceptance criteria.
+- **Review Timing**: Identify natural review points between batches.
+
+### Manual Extraction Fallback
+
+If the parsing engine is unavailable (no Node.js or runtime constraints), manually extract using the mapping rules below. The manual extraction must be equally thorough — cross-check each extracted field against the source artifact.
+
 ## Mapping Rules
 
 ### From `proposal.md`
@@ -70,6 +112,20 @@ Extract:
 - completion definitions
 - review timing
 
+## Cross-Check: Requirement Coverage
+
+Before finalizing the execution contract, perform a coverage check:
+
+1. List every requirement (SHALL/MUST statement) from `specs/`
+2. Check each requirement against the contract:
+   - Is it reflected in the **Approved Behavior** section?
+   - Is there a corresponding **test obligation**?
+   - Is it represented in at least one **execution batch** or **acceptance check**?
+3. If a requirement is not covered by a test obligation or batch, **flag it** in the contract's "Escalation Rules" section.
+4. If a requirement spans multiple batches, note the dependency in the batch descriptions.
+
+**Output requirement**: The contract must explicitly state if any requirement could not be mapped. Do not silently drop requirements.
+
 ## Purpose
 
 The execution contract is not a duplicate planning document.
@@ -102,7 +158,8 @@ After drafting or refreshing the contract:
 
 1. summarize the important handoff rules
 2. identify anything still ambiguous
-3. ask the user to approve the contract explicitly
+3. highlight any requirements that could not be mapped to test obligations or batches
+4. ask the user to approve the contract explicitly
 
 Only after explicit approval may the workflow move to `execution-governor`.
 
@@ -124,6 +181,7 @@ Refresh the contract if any of the following are true:
 - Implementation begins only after explicit approval.
 - Do not skip `execution-contract.md` just because the planning docs look complete.
 - Do not write production code inside this skill.
+- If the coverage cross-check reveals unmapped requirements, flag them explicitly in the contract and in the approval summary.
 
 ## Output Standard
 
@@ -133,4 +191,5 @@ Your response should include:
 2. the key intent lock and scope fence
 3. the most important test obligations
 4. the main review or rewind triggers
-5. a direct request for user approval
+5. any requirements that could not be mapped to test obligations or batches (coverage gaps)
+6. a direct request for user approval
