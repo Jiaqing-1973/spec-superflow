@@ -4,6 +4,21 @@ All notable changes to `spec-superflow` will be documented in this file.
 
 The format loosely follows Keep a Changelog.
 
+## [0.6.0] - 2026-06-29
+
+### Added
+
+- **Fast-path workflow modes** — hotfix and tweak modes skip full planning for small changes. Hotfix: ≤2 files, no new modules, minimal contract. Tweak: ≤4 files, config/doc only, direct edit. Auto-upgrade to full when thresholds exceeded.
+- **Phase-drift prevention** — `ssf inject` command generates `rules/phase-guard.md` and installs to `.claude/always/` for per-turn Agent context injection. 9 state templates with allowed/forbidden operations. Forms a soft+hard dual defense with guard.mjs.
+- **Decision point protocol** — `docs/decision-points.md` defines 7 standard decision points (DP-1 through DP-7) with triggers, inputs, outputs, and associated skills. All 4 affected skills reference DP numbers.
+- **Guard mode awareness** — `guard.mjs` accepts `--workflow` parameter (full/hotfix/tweak) for mode-specific check skipping. 2 new transitions: `exploring→bridging`, `exploring→approved`.
+- **State set command** — `ssf state set <dir> <field> <value>` with SETTABLE_FIELDS whitelist. 14 new decision point audit fields (dp_N_result + dp_N_timestamp).
+
+### Changed
+
+- **Guard schema-valid** — Uses `validateDeltaSpec` for change specs, fixing a format mismatch between delta spec and main spec validators.
+- **4 skill files** — workflow-orchestrator (mode detection + fast-path routing + DP refs), bridge-contract (hotfix minimal contract), execution-governor (tweak direct edit), closure-archivist (lightweight closure).
+
 ## [0.5.0] - 2026-06-29
 
 ### Added

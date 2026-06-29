@@ -285,6 +285,17 @@ npx spec-superflow list
 | `ssf state transition <dir> <to>` | 记录状态转换 |
 | `ssf state get <dir> <field>` | 读取单个状态字段 |
 | `ssf state rebuild <dir>` | 从工件重建状态文件 |
+| `ssf state set <dir> <field> <value>` | 设置状态字段（workflow、execution_mode、决策点结果） |
+| `ssf inject <dir>` | 生成 phase-guard.md 并安装到 `.claude/always/` |
+
+### 快速路径（hotfix / tweak）
+
+v0.6.0 新增两种轻量工作流模式，让简单变更跳过完整规划：
+
+- **hotfix** — ≤2 文件、无新模块、无 schema 变更时，跳过 spec-explorer 和完整 spec-forger，走最小契约 → inline 执行 → 轻量闭合。超出阈值自动升级为 full。
+- **tweak** — ≤4 文件、纯配置/文档修改时，跳过 spec-explorer、spec-forger 和 bridge-contract，直接编辑 → 轻量闭合。超出阈值自动升级为 full。
+
+配合 `guard.mjs` 的模式感知和 `docs/decision-points.md` 的 7 个标准决策点，小变更不再被流程拖慢。
 
 配置系统支持可选的 `spec-superflow.config.json`，可自定义工件顺序、跳过工件、调整阈值等。不创建文件则使用内置默认值。
 
@@ -427,6 +438,8 @@ spec-superflow 是**源码级融合**，不是简单并列：
 
 ## 版本历史
 
+- **v0.6.0** — 快速感知。hotfix/tweak 快速路径、phase-guard.md 阶段防漂移、7 个标准决策点协议、guard.mjs 模式感知。`ssf inject` + `ssf state set` 新命令。
+- **v0.5.0** — 可靠性层。guard.mjs 守护脚本（5 维度硬门禁）、.spec-superflow.yaml 状态文件、SHA256 哈希加速过期检测。`ssf state` 5 子命令。
 - **v0.4.0** — 平台化演进。新增 CLI 工具链（`ssf` 6 子命令）、可配置 Schema（`spec-superflow.config.json`）、中英文双 tokenizer、spec 冲突检测、git worktree 隔离。8 状态机（含 abandoned 终态）。
 - **v0.3.0** — 工作流增强。Inline 执行模式、abandoned 终态、三维验证（Completeness/Correctness/Coherence）、writing-plans 方法论整合。
 - **v0.2.0** — 源码级融合。新增引擎层（src/），从 6 skill 扩展到 9 skill。新增 TDD 铁律、SDD、系统化调试、代码审查、Delta Spec 同步。7 状态机。
