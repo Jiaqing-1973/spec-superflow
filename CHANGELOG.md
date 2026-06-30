@@ -4,6 +4,12 @@ All notable changes to `spec-superflow` will be documented in this file.
 
 The format loosely follows Keep a Changelog.
 
+## [0.7.1] - 2026-06-30
+
+### Fixed
+
+- **README consistency** — 移除架构图中不存在的 `schemas/` 目录，补充 `scripts/guard/`、`install-cursor.mjs`、`infer-workflow.mjs`；明确 Cursor 的 session-start hook 需要手动复制到 `.cursor/hooks.json`。
+
 ## [0.7.0] - 2026-06-30
 
 ### Added
