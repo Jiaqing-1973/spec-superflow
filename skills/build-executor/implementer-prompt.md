@@ -5,7 +5,7 @@ Use this template when dispatching an implementer subagent.
 ```
 Subagent (general-purpose):
   description: "Implement Task N: [task name]"
-  model: [MODEL — REQUIRED: choose per execution-governor Model Selection; an omitted
+  model: [MODEL — REQUIRED: choose per build-executor Model Selection; an omitted
          model silently inherits the session's most expensive one]
   prompt: |
     You are implementing Task N: [task name]
@@ -140,7 +140,7 @@ Subagent (general-purpose):
 
 **Placeholders:**
 - `[task name]` — short name for the task
-- `[MODEL]` — REQUIRED: implementer model per execution-governor Model Selection
+- `[MODEL]` — REQUIRED: implementer model per build-executor Model Selection
 - `[BRIEF_FILE]` — REQUIRED: the task brief file (`scripts/task-brief PLAN N` prints the path)
 - `[directory]` — working directory for the implementation
 - `[REPORT_FILE]` — REQUIRED: the file path where the implementer writes its full report

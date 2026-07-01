@@ -13,7 +13,7 @@ After a spec-superflow change completes, its delta specs (ADDED/MODIFIED/REMOVED
 
 ## When to Use
 
-- After `closure-archivist` marks a change ready to archive
+- After `release-archivist` marks a change ready to archive
 - When multiple changes have accumulated unsynced delta specs
 - When the user asks about spec consistency
 - When the workflow orchestrator detects stale main specs
@@ -195,6 +195,6 @@ After syncing:
 
 ## Relationship to Other Skills
 
-- Invoked by `closure-archivist` after verification completes
-- Can be invoked by `workflow-orchestrator` if stale main specs are detected
-- Specs synced here become the new baseline for future `spec-explorer` and `spec-forger` work
+- Invoked by `release-archivist` after verification completes
+- Can be invoked by `workflow-start` if stale main specs are detected
+- Specs synced here become the new baseline for future `need-explorer` and `spec-writer` work

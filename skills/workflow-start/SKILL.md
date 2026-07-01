@@ -3,16 +3,17 @@ name: workflow-start
 description: Primary entry point for spec-superflow. Invoke when the user says start, continue, resume, implement, plan, or when the current workflow stage is unclear and the next skill must be chosen safely.
 ---
 
-# Workflow Orchestrator
+# Workflow Start
 
 This is the primary entry point for `spec-superflow`.
 
 Its job is not to implement anything directly. Its job is to:
 
 1. inspect the current change context
-2. determine the current workflow state
-3. route to the correct next skill
-4. block invalid transitions
+2. confirm key decisions with the user before design (DP-0)
+3. determine the current workflow state
+4. route to the correct next skill
+5. block invalid transitions
 
 ## Use This Skill When
 
@@ -61,6 +62,40 @@ Then answer these questions in order:
 4. Has the user explicitly approved the contract for build work?
 5. Is execution in progress or blocked by a bug?
 6. Is the change already in verification or wrap-up?
+
+## DP-0: User Confirmation Gate (Design-Preparation)
+
+Before routing to `spec-writer` for a new or incomplete change, confirm key decisions with the user. Do not generate planning artifacts until this gate is passed.
+
+### When to run DP-0
+
+Run DP-0 when **all** of the following are true:
+- The change folder does not exist, OR
+- Planning artifacts (`proposal.md`, `specs/`, `design.md`, `tasks.md`) are missing or empty, OR
+- `.spec-superflow.yaml` does not contain `dp_0_confirmed: true`.
+
+If `dp_0_confirmed` is `true`, skip this gate and proceed with normal state detection.
+
+### Required Questions
+
+Ask the user at least these questions. Record the answers in `.spec-superflow.yaml`.
+
+1. **Scope**: What is the change name and one-sentence intent?
+2. **Constraints**: Are there known constraints (naming style, compatibility policy, platforms affected)?
+3. **Related optimizations**: Should this change include related optimizations (e.g., issue #5 Batch Inline) or stay focused?
+4. **Communication preference**: Do you prefer to be asked before each design decision, or receive a draft for review?
+
+### Recording DP-0
+
+After the user confirms:
+
+```bash
+node scripts/spec-superflow.mjs state set <change-dir> dp_0_decisions "<summary>"
+node scripts/spec-superflow.mjs state set <change-dir> dp_0_confirmed true
+node scripts/spec-superflow.mjs state set <change-dir> dp_0_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+```
+
+Then proceed to normal state detection and routing.
 
 ### Config-Aware Routing
 
@@ -144,14 +179,14 @@ Compare the proposal's scope against spec files:
 
 ## Routing Rules
 
-### Route to `spec-explorer` when:
+### Route to `need-explorer` when:
 
 - the request is still fuzzy
 - scope is unclear
 - the user is comparing options
 - there is no stable change name yet
 
-### Route to `spec-forger` when:
+### Route to `spec-writer` when:
 
 - **Guard check**: If a change directory exists, run `node scripts/guard/guard.mjs check <dir> exploring specifying --json`
   - If exit code ≠ 0 → BLOCK. Report failures, do not route.
@@ -160,7 +195,7 @@ Compare the proposal's scope against spec files:
 - planning artifacts are missing or incomplete
 - proposal, specs, design, or tasks need to be created or revised
 
-### Route to `bridge-contract` when:
+### Route to `contract-builder` when:
 
 - **Guard check**: Run `node scripts/guard/guard.mjs check <dir> specifying bridging --json`
   - If exit code ≠ 0 → BLOCK. Report failures (missing artifacts or schema validation errors), do not route.
@@ -170,7 +205,7 @@ Compare the proposal's scope against spec files:
 - the execution contract is missing or stale
 - planning artifacts changed after the last contract draft
 
-### Route to `execution-governor` when:
+### Route to `build-executor` when:
 
 - **Guard check**: Run `node scripts/guard/guard.mjs check <dir> approved executing --json`
   - If exit code ≠ 0 → BLOCK. Report failures (contract stale or artifacts missing), do not route.
@@ -180,23 +215,23 @@ Compare the proposal's scope against spec files:
 - implementation is the active task
 - the contract still matches the current planning artifacts
 
-### Route to `systematic-debugger` when:
+### Route to `bug-investigator` when:
 
 - execution is in the `executing` state but has hit a blockage
 - a test failure, unexpected behavior, or build error has stopped progress
-- the execution-governor reports a task cannot proceed
+- the build-executor reports a task cannot proceed
 - the user reports a bug during active implementation
 
-After debugging completes, route back to `execution-governor` to resume the executing state.
+After debugging completes, route back to `build-executor` to resume the executing state.
 
 ### Route to `code-reviewer` when:
 
 - an execution batch has been completed
-- the execution-governor has finished a group of related tasks
+- the build-executor has finished a group of related tasks
 - a full batch is ready for spec-compliance and code-quality verification
 - the user asks for a review checkpoint
 
-### Route to `closure-archivist` when:
+### Route to `release-archivist` when:
 
 - **Guard check**: Run `node scripts/guard/guard.mjs check <dir> executing closing --json`
   - If exit code ≠ 0 → BLOCK. Report failures (unfinished tasks or missing test evidence), do not route.
@@ -205,9 +240,9 @@ After debugging completes, route back to `execution-governor` to resume the exec
 - verification is complete or nearly complete
 - the user wants a final summary, archive, or wrap-up
 
-### Route to `spec-syncer` when:
+### Route to `spec-merger` when:
 
-- closure-archivist reports delta specs exist that need merging
+- release-archivist reports delta specs exist that need merging
 - the change is closing and has ADDED/MODIFIED/REMOVED/RENAMED specs
 - multiple changes have accumulated unsynced delta specs
 - the user asks about spec consistency
@@ -215,27 +250,27 @@ After debugging completes, route back to `execution-governor` to resume the exec
 ### Route to `abandonment` when:
 
 - the user explicitly requests to abandon the change
-- systematic-debugger has escalated after 3+ consecutive fix failures AND the user chooses to abandon
+- bug-investigator has escalated after 3+ consecutive fix failures AND the user chooses to abandon
 - scope change during specifying makes the change no longer worthwhile AND the user confirms abandonment
 - the current state is NOT `closing` or `abandoned` (terminal states block abandonment transition)
 
 ### Hotfix Fast-Path Routing
 
 When workflow is `hotfix`:
-- Route to `bridge-contract` with minimal contract mode (intent + task list only)
-- Skip `spec-explorer` and full `spec-forger`
+- Route to `contract-builder` with minimal contract mode (intent + task list only)
+- Skip `need-explorer` and full `spec-writer`
 - Guard check: `node scripts/guard/guard.mjs check <dir> exploring bridging --workflow hotfix --json`
 - After bridge: DP-3 契约批准
-- After approval: route to `execution-governor` (inline mode)
-- After execution: route to `closure-archivist` (lightweight closure)
+- After approval: route to `build-executor` (inline mode)
+- After execution: route to `release-archivist` (lightweight closure)
 
 ### Tweak Fast-Path Routing
 
 When workflow is `tweak`:
-- Route directly to `execution-governor` (direct edit mode)
-- Skip `spec-explorer`, `spec-forger`, and `bridge-contract`
+- Route directly to `build-executor` (direct edit mode)
+- Skip `need-explorer`, `spec-writer`, and `contract-builder`
 - Guard check: `node scripts/guard/guard.mjs check <dir> exploring approved --workflow tweak --json`
-- After execution: route to `closure-archivist` (lightweight closure: file exists + syntax check)
+- After execution: route to `release-archivist` (lightweight closure: file exists + syntax check)
 
 ### Post-Transition Injection Prompt
 
@@ -254,7 +289,7 @@ Treat `execution-contract.md` as stale if:
 - `tasks.md` changed execution batches materially
 - the contract's intent lock no longer matches the proposal's scope (content-level check)
 
-If stale, do not continue implementation. Route back to `bridge-contract`.
+If stale, do not continue implementation. Route back to `contract-builder`.
 
 Treat planning artifacts as stale if:
 
@@ -268,17 +303,17 @@ Treat planning artifacts as stale if:
 - Do not allow implementation before `execution-contract.md` exists.
 - Do not treat "continue" as permission to skip state inspection.
 - Do not allow continued implementation if scope or core behavior changed without artifact updates.
-- If the user is in `executing` but the contract is stale, route backward to `bridge-contract`.
-- Do not allow implementation to continue past a bug without `systematic-debugger` investigation.
+- If the user is in `executing` but the contract is stale, route backward to `contract-builder`.
+- Do not allow implementation to continue past a bug without `bug-investigator` investigation.
 - Do not move from execution batches to closure without code review first.
-- Do not close a change with unsynced delta specs without routing to `spec-syncer`.
-- If the detected state is `debugging`, ensure `systematic-debugger` completes before routing back.
+- Do not close a change with unsynced delta specs without routing to `spec-merger`.
+- If the detected state is `debugging`, ensure `bug-investigator` completes before routing back.
 - If the user asks to skip a review gate, explain why the gate exists and ask for confirmation.
 - Do not allow any state transitions FROM `abandoned` — it is a terminal state.
 - Do not allow transition to `abandoned` from `closing` or `abandoned` — these are already terminal.
-- Do not auto-abandon without user confirmation — even if systematic-debugger recommends it.
+- Do not auto-abandon without user confirmation — even if bug-investigator recommends it.
 - When transitioning to `abandoned`, prompt for abandonment summary generation before confirming.
-- Do not merge delta specs from an abandoned change — spec-syncer must block this.
+- Do not merge delta specs from an abandoned change — spec-merger must block this.
 
 ## Output Standard
 
@@ -295,10 +330,10 @@ If content-level inspection was performed, include a brief note on what was comp
 ### Decision Point References
 
 When routing to a skill that has an associated decision point, include the decision point number in the output:
-- Route to bridge-contract → include `DP-3: 契约批准 — 用户需明确批准 execution-contract.md`
-- Route to execution-governor → include `DP-4: 执行模式选择 — 用户选择 TDD 或 SDD`
-- Route to systematic-debugger (escalation) → include `DP-5: 调试升级`
-- Route to closure-archivist → include `DP-7: 归档确认`
+- Route to contract-builder → include `DP-3: 契约批准 — 用户需明确批准 execution-contract.md`
+- Route to build-executor → include `DP-4: 执行模式选择 — 用户选择 TDD 或 SDD`
+- Route to bug-investigator (escalation) → include `DP-5: 调试升级`
+- Route to release-archivist → include `DP-7: 归档确认`
 
 Reference: `docs/decision-points.md`
 

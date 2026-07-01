@@ -16,6 +16,9 @@ const BUILTIN_DEFAULTS = {
   last_transition: null,
   last_transition_from: null,
   last_transition_to: null,
+  dp_0_decisions: null,
+  dp_0_confirmed: null,
+  dp_0_timestamp: null,
   dp_1_result: null,
   dp_1_timestamp: null,
   dp_2_result: null,
@@ -76,6 +79,9 @@ export function writeState(changeDir, state) {
   lines.push(`last_transition_to: ${state.last_transition_to || 'null'}`);
   lines.push('');
   lines.push('# === Decision points ===');
+  lines.push(`dp_0_decisions: ${state.dp_0_decisions ?? 'null'}`);
+  lines.push(`dp_0_confirmed: ${state.dp_0_confirmed ?? 'null'}`);
+  lines.push(`dp_0_timestamp: ${state.dp_0_timestamp ?? 'null'}`);
   lines.push(`dp_1_result: ${state.dp_1_result ?? 'null'}`);
   lines.push(`dp_1_timestamp: ${state.dp_1_timestamp ?? 'null'}`);
   lines.push(`dp_2_result: ${state.dp_2_result ?? 'null'}`);

@@ -69,14 +69,14 @@ Then **recommend one approach** and explain why.
 
 ### 5. Validate Before Concluding
 
-Before handing off to `spec-forger`, confirm with the user:
+Before handing off to `spec-writer`, confirm with the user:
 
 - "Here's what I'm hearing. [Restate problem, scope, non-goals, success criteria]. Does this match what you have in mind?"
 - If the user corrects anything, incorporate it and re-validate.
 
 ### 6. Hand Off
 
-Once the idea is stable, hand off to `spec-forger`.
+Once the idea is stable, hand off to `spec-writer`.
 
 ## Anti-Patterns
 
@@ -132,7 +132,7 @@ This skill exists to stabilize intent, not to build.
 
 ## Self-Review Before Handoff
 
-Before handing off to `spec-forger`, perform a self-review:
+Before handing off to `spec-writer`, perform a self-review:
 
 1. **Placeholder scan**: Are there any vague phrases like "probably", "maybe", "TBD", or "we'll figure it out later"? If yes, resolve them.
 2. **Contradiction check**: Do any scope items conflict with non-goals? Does the success criteria contradict any stated constraint?

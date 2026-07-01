@@ -17,7 +17,7 @@ This skill unifies two review responsibilities: requesting review (dispatching a
 
 **Mandatory:**
 
-- After each task in subagent-driven development (via execution-governor)
+- After each task in subagent-driven development (via build-executor)
 - After completing a major feature
 - After each execution batch
 - Before merge to main

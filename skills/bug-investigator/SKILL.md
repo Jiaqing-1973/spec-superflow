@@ -1,6 +1,6 @@
 ---
 name: bug-investigator
-description: Use when encountering any bug, test failure, or unexpected behavior during spec-superflow execution, before proposing fixes. Invoked automatically when execution-governor hits a blockage.
+description: Use when encountering any bug, test failure, or unexpected behavior during spec-superflow execution, before proposing fixes. Invoked automatically when build-executor hits a blockage.
 ---
 
 # Systematic Debugger
@@ -48,9 +48,9 @@ Use for ANY technical issue:
 
 ## Integration with spec-superflow
 
-When debugging during `spec-superflow` execution, the `execution-governor` routes to this skill when an implementation task hits a blockage. After debugging completes, return to the `executing` state via the `execution-governor`.
+When debugging during `spec-superflow` execution, the `build-executor` routes to this skill when an implementation task hits a blockage. After debugging completes, return to the `executing` state via the `build-executor`.
 
-This skill respects the TDD rules embedded in `execution-governor`: before writing a fix, create a failing test that reproduces the bug. The fix is validated by the test turning green.
+This skill respects the TDD rules embedded in `build-executor`: before writing a fix, create a failing test that reproduces the bug. The fix is validated by the test turning green.
 
 ## The Four Phases
 
@@ -183,7 +183,7 @@ You MUST complete each phase before proceeding to the next.
    - Automated test if possible
    - One-off test script if no framework
    - MUST have before fixing
-   - Follow the TDD rules embedded in `execution-governor` for writing proper failing tests
+   - Follow the TDD rules embedded in `build-executor` for writing proper failing tests
 
 2. **Implement Single Fix**
    - Address the root cause identified

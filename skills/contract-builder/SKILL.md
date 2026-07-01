@@ -161,7 +161,7 @@ After drafting or refreshing the contract:
 3. highlight any requirements that could not be mapped to test obligations or batches
 4. ask the user to approve the contract explicitly
 
-Only after explicit approval may the workflow move to `execution-governor`.
+Only after explicit approval may the workflow move to `build-executor`.
 
 ## Stale Contract Detection
 

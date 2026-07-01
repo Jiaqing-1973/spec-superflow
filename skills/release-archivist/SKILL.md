@@ -138,7 +138,7 @@ Produce a structured report:
 
 **Overall verdict**: PASS (all PASS) / CONDITIONAL (WARN only) / FAIL (any FAIL)
 
-If FAIL → do not claim completion. Fix issues or route back to execution-governor.
+If FAIL → do not claim completion. Fix issues or route back to build-executor.
 If CONDITIONAL → present WARN findings to user, proceed only with explicit acceptance.
 If PASS → proceed to final checks.
 
@@ -186,7 +186,7 @@ After verification completes:
 
 1. Run: `node scripts/spec-superflow.mjs state transition <change-dir> closing`
 2. This updates `.spec-superflow.yaml` with `state: closing` and records the transition
-3. If delta specs were created, route to `spec-syncer` before final archiving
+3. If delta specs were created, route to `spec-merger` before final archiving
 4. If no delta specs exist, the change is ready to archive
 
 The closure is not complete until delta specs are merged. Specs that aren't synced become lies.
@@ -200,11 +200,11 @@ Your response should include:
 3. delivered behavior summary
 4. residual risks
 5. delta spec status (exist or not)
-6. recommended routing (to `spec-syncer` or archive)
+6. recommended routing (to `spec-merger` or archive)
 
 ## Lightweight Closure (hotfix/tweak mode)
 
-When workflow is `hotfix` or `tweak`, closure-archivist performs lightweight verification:
+When workflow is `hotfix` or `tweak`, release-archivist performs lightweight verification:
 1. Verify all changed files exist and are non-empty
 2. Run syntax check on code files (`node --check` for .mjs/.js)
 3. Skip the full 5-step three-dimensional verification

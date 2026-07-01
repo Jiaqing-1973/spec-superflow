@@ -200,7 +200,7 @@ After each batch completes and the progress ledger is updated, sync the state fi
 Refer to `implementer-prompt.md` for the complete dispatch template. Key principles:
 
 - Subagent works from its task brief, not the whole plan
-- Subagent follows TDD (the rules embedded in this execution-governor)
+- Subagent follows TDD (the rules embedded in this build-executor)
 - Subagent self-reviews before reporting back
 - Subagent escalates when stuck (BLOCKED, NEEDS_CONTEXT) rather than guessing
 - Subagent writes its full report to the report file, returns only status summary
@@ -251,7 +251,7 @@ If an inline task hits a BLOCKED state (test failure after 3 fix attempts, or th
 | Model selection | Per-task model routing | Single model |
 | Progress ledger | Yes | Yes |
 | TDD Iron Law | Yes | Yes |
-| Escalation | → systematic-debugger | → SDD mode or systematic-debugger |
+| Escalation | → bug-investigator | → SDD mode or bug-investigator |
 
 ## Progress Reporting
 
@@ -265,7 +265,7 @@ If drift appears, stop and route backward instead of improvising new behavior.
 
 ## Tweak Mode: Direct Edit
 
-When workflow is `tweak`, execution-governor operates in direct edit mode:
+When workflow is `tweak`, build-executor operates in direct edit mode:
 1. Skip TDD Iron Law (no test-first requirement for config/doc changes)
 2. Apply changes directly to target files
 3. Verify file integrity after each change (file exists, non-empty, valid syntax)
@@ -283,4 +283,4 @@ Do not report completion until:
 - contract obligations are satisfied
 - review blockers are resolved
 - all batches have been reviewed (per-task reviews + broad final review)
-- the workflow is ready for `closure-archivist`
+- the workflow is ready for `release-archivist`

@@ -3,7 +3,7 @@ name: spec-writer
 description: Create or refine spec-superflow planning artifacts. Invoke when the change is understood well enough to write `proposal.md`, `specs/`, `design.md`, and `tasks.md`.
 ---
 
-# Spec Forger
+# Spec Writer
 
 Use this skill when the change has moved beyond exploration and is ready to become concrete artifacts.
 
@@ -16,6 +16,15 @@ Invoke this skill when the user says things like:
 - "create the design doc"
 - "break the work into tasks"
 - "formalize the plan"
+
+## Required Inputs
+
+Before generating or revising artifacts, read:
+
+- `.spec-superflow.yaml` — especially `dp_0_decisions` and `dp_0_confirmed`
+- Any existing planning artifacts in the change folder
+
+If `dp_0_confirmed` is not `true` for a new/incomplete change, stop and route back to `workflow-start` to complete DP-0.
 
 ## Required Artifacts
 
@@ -42,6 +51,13 @@ Use OpenSpec-style artifact roles:
 - `tasks.md` defines dependency-aware implementation steps
 
 ## Working Rules
+
+### Honor DP-0 Decisions
+
+- Read `dp_0_decisions` from `.spec-superflow.yaml` before writing.
+- Respect confirmed constraints (e.g., naming style, scope inclusions, communication preference).
+- Do not silently expand scope beyond what was confirmed in DP-0.
+- If you encounter an unconfirmed decision, pause artifact generation and ask the user.
 
 ### `proposal.md`
 
@@ -155,9 +171,9 @@ After creating or modifying any artifact, run these validation checks. Do not ha
 
 ## Quality Gate
 
-**If any artifact fails validation, fix it before handing off to `bridge-contract`.**
+**If any artifact fails validation, fix it before handing off to `contract-builder`.**
 
-Do not hand off broken artifacts. The validation checks above are not advisory — they are the minimum bar for the next stage to function. If you skip validation, the bridge-contract will produce a contract with holes, and execution will drift.
+Do not hand off broken artifacts. The validation checks above are not advisory — they are the minimum bar for the next stage to function. If you skip validation, the contract-builder will produce a contract with holes, and execution will drift.
 
 ## Self-Review Checklist
 
@@ -178,7 +194,7 @@ Before handing off:
 
 Do not start implementation after writing planning artifacts.
 
-Once the artifacts are stable and validated, hand off to `bridge-contract`.
+Once the artifacts are stable and validated, hand off to `contract-builder`.
 
 ## Output Standard
 
