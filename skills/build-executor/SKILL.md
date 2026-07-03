@@ -3,7 +3,7 @@ name: build-executor
 description: Govern implementation from an approved execution contract. Invoke when `execution-contract.md` is approved and the user wants disciplined build work, TDD execution, or guarded batch-by-batch implementation.
 ---
 
-# Execution Governor
+# Build Executor
 
 This skill controls the implementation phase of `spec-superflow`.
 
@@ -217,9 +217,9 @@ Use the least powerful model that can handle each role:
 
 For each task in the execution batch:
 
-1. **Dispatch implementer**: Use the template at `${CLAUDE_PLUGIN_ROOT}/skills/build-executor/implementer-prompt.md` to craft the dispatch. Run `scripts/task-brief PLAN_FILE N` to extract the task brief to a file. Compose the dispatch prompt with: (a) where this task fits, (b) the brief path, (c) interfaces/decisions from prior tasks, (d) report file path.
+1. **Dispatch implementer**: Use the template at `${CLAUDE_PLUGIN_ROOT}/skills/build-executor/implementer-prompt.md` to craft the dispatch. Run `${CLAUDE_PLUGIN_ROOT}/scripts/task-brief PLAN_FILE N` to extract the task brief to a file. Compose the dispatch prompt with: (a) where this task fits, (b) the brief path, (c) interfaces/decisions from prior tasks, (d) report file path.
 2. **Handle implementer response**:
-   - **DONE**: Generate review package with `scripts/review-package BASE HEAD` and dispatch task reviewer
+   - **DONE**: Generate review package with `${CLAUDE_PLUGIN_ROOT}/scripts/review-package BASE HEAD` and dispatch task reviewer
    - **DONE_WITH_CONCERNS**: Read concerns, assess, then review
    - **NEEDS_CONTEXT**: Provide missing context, re-dispatch
    - **BLOCKED**: Assess blocker — if task requires more reasoning, re-dispatch with better model; if plan is wrong, escalate to user
@@ -231,9 +231,9 @@ For each task in the execution batch:
 
 Keep your context lean by handing artifacts as files, not pasted text:
 
-- **Task brief**: `scripts/task-brief PLAN_FILE N` — extracts task text to a uniquely named file
+- **Task brief**: `${CLAUDE_PLUGIN_ROOT}/scripts/task-brief PLAN_FILE N` — extracts task text to a uniquely named file
 - **Report file**: Named after the brief (`task-N-report.md`) — implementer writes full report there, returns only status summary
-- **Review package**: `scripts/review-package BASE HEAD` — writes diff to a unique file; reviewer reads one file instead of running git commands
+- **Review package**: `${CLAUDE_PLUGIN_ROOT}/scripts/review-package BASE HEAD` — writes diff to a unique file; reviewer reads one file instead of running git commands
 
 ### Progress Ledger
 
@@ -243,9 +243,7 @@ The ledger survives context compaction. If `git clean -fdx` destroys it, recover
 
 After each batch completes and the progress ledger is updated, sync the state file:
 
-1. Run: `node scripts/spec-superflow.mjs state get <change-dir> batches_completed`
-2. Increment and update: `node scripts/spec-superflow.mjs state transition <change-dir> executing`
-   (This updates `batches_completed` and `last_transition` timestamp)
+Track progress — run `ssf state set <change-dir> batches_completed <N>` after each completed batch.
 
 ### Dispatch Instructions for Implementer Subagents
 
@@ -276,7 +274,7 @@ For small changes (≤ 3 tasks, no cross-module dependencies). Executes in the c
 
 ### Per-Task Loop (Inline)
 
-1. **Read task**: Use `scripts/task-brief PLAN_FILE N` to extract the task
+1. **Read task**: Use `${CLAUDE_PLUGIN_ROOT}/scripts/task-brief PLAN_FILE N` to extract the task
 2. **Write failing test**: Follow the task's TDD phase 1 — write the exact test code specified
 3. **Confirm failure**: Run the test, verify it fails for the expected reason
 4. **Implement**: Follow the task's TDD phase 3 — write the exact implementation code specified

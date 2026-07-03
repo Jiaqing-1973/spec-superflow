@@ -3,7 +3,7 @@ name: bug-investigator
 description: Use when encountering any bug, test failure, or unexpected behavior during spec-superflow execution, before proposing fixes. Invoked automatically when build-executor hits a blockage.
 ---
 
-# Systematic Debugger
+# Bug Investigator
 
 ## Overview
 
@@ -204,6 +204,8 @@ You MUST complete each phase before proceeding to the next.
    - DON'T attempt Fix #4 without architectural discussion
 
 5. **If 3+ Fixes Failed: Question Architecture**
+
+   **DP-5: 调试升级** — 3+ 次修复失败后需用户决定是否继续、回退或放弃。记录: `ssf state set <change-dir> dp_5_result <decision>`
 
    **Pattern indicating architectural problem:**
    - Each fix reveals new shared state/coupling/problem in different place

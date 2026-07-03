@@ -131,7 +131,7 @@ Before routing, determine the workflow mode.
 
 If `.spec-superflow.yaml` workflow is `auto`, `null`, or unset:
 
-1. Run: `node scripts/infer-workflow.mjs <change-dir>`
+1. Run: `node "${CLAUDE_PLUGIN_ROOT}/scripts/infer-workflow.mjs" <change-dir>`
 2. The script inspects `proposal.md` scope and `tasks.md` to infer `hotfix`, `tweak`, or `full`.
 3. Run: `ssf state set <dir> workflow <mode>` to persist the inferred mode.
 4. Output the inferred mode and reason to the user.
@@ -206,7 +206,7 @@ Compare the proposal's scope against spec files:
 
 ### Route to `spec-writer` when:
 
-- **Guard check**: If a change directory exists, run `node scripts/guard/guard.mjs check <dir> exploring specifying --json`
+- **Guard check**: If a change directory exists, run `node "${CLAUDE_PLUGIN_ROOT}/scripts/guard/guard.mjs" check <dir> exploring specifying --json`
   - If exit code ≠ 0 → BLOCK. Report failures, do not route.
   - If exit code = 0 → proceed.
 - the user knows what they want
@@ -215,7 +215,7 @@ Compare the proposal's scope against spec files:
 
 ### Route to `contract-builder` when:
 
-- **Guard check**: Run `node scripts/guard/guard.mjs check <dir> specifying bridging --json`
+- **Guard check**: Run `node "${CLAUDE_PLUGIN_ROOT}/scripts/guard/guard.mjs" check <dir> specifying bridging --json`
   - If exit code ≠ 0 → BLOCK. Report failures (missing artifacts or schema validation errors), do not route.
   - If exit code = 0 → proceed.
 - planning artifacts exist
@@ -225,7 +225,7 @@ Compare the proposal's scope against spec files:
 
 ### Route to `build-executor` when:
 
-- **Guard check**: Run `node scripts/guard/guard.mjs check <dir> approved-for-build executing --json`
+- **Guard check**: Run `node "${CLAUDE_PLUGIN_ROOT}/scripts/guard/guard.mjs" check <dir> approved-for-build executing --json`
   - If exit code ≠ 0 → BLOCK. Report failures (contract stale or artifacts missing), do not route.
   - If exit code = 0 → proceed.
 - `execution-contract.md` exists
@@ -251,7 +251,7 @@ After debugging completes, route back to `build-executor` to resume the executin
 
 ### Route to `release-archivist` when:
 
-- **Guard check**: Run `node scripts/guard/guard.mjs check <dir> executing closing --json`
+- **Guard check**: Run `node "${CLAUDE_PLUGIN_ROOT}/scripts/guard/guard.mjs" check <dir> executing closing --json`
   - If exit code ≠ 0 → BLOCK. Report failures (unfinished tasks or missing test evidence), do not route.
   - If exit code = 0 → proceed.
 - implementation is complete
@@ -277,7 +277,7 @@ After debugging completes, route back to `build-executor` to resume the executin
 When workflow is `hotfix`:
 - Route to `contract-builder` with minimal contract mode (intent + task list only)
 - Skip `need-explorer` and full `spec-writer`
-- Guard check: `node scripts/guard/guard.mjs check <dir> exploring bridging --workflow hotfix --json`
+- Guard check: `node "${CLAUDE_PLUGIN_ROOT}/scripts/guard/guard.mjs" check <dir> exploring bridging --workflow hotfix --json`
 - After bridge: DP-3 契约批准
 - After approval: route to `build-executor` (inline mode)
 - After execution: route to `release-archivist` (lightweight closure)
@@ -287,7 +287,7 @@ When workflow is `hotfix`:
 When workflow is `tweak`:
 - Route directly to `build-executor` (direct edit mode)
 - Skip `need-explorer`, `spec-writer`, and `contract-builder`
-- Guard check: `node scripts/guard/guard.mjs check <dir> exploring approved-for-build --workflow tweak --json`
+- Guard check: `node "${CLAUDE_PLUGIN_ROOT}/scripts/guard/guard.mjs" check <dir> exploring approved-for-build --workflow tweak --json`
 - After execution: route to `release-archivist` (lightweight closure: file exists + syntax check)
 
 ### Post-Transition Injection Prompt
@@ -351,6 +351,7 @@ When routing to a skill that has an associated decision point, include the decis
 - Route to contract-builder → include `DP-3: 契约批准 — 用户需明确批准 execution-contract.md`
 - Route to build-executor → include `DP-4: 执行模式选择 — 用户选择 TDD 或 SDD`
 - Route to bug-investigator (escalation) → include `DP-5: 调试升级`
+- Route to release-archivist (verification failure) → include `DP-6: 验证失败 — 验证未通过时需用户决定`
 - Route to release-archivist → include `DP-7: 归档确认`
 
 Reference: `docs/decision-points.md`

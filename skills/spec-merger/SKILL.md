@@ -3,7 +3,7 @@ name: spec-merger
 description: Sync delta specs to main specs after closure. Invoke when a change is closing, delta specs need merging into the main spec base, or when detecting spec drift across multiple changes.
 ---
 
-# Spec Syncer
+# Spec Merger
 
 ## Overview
 
@@ -45,7 +45,7 @@ Before syncing any delta specs:
 Locate all delta spec files under the change folder:
 
 ```
-workflow/changes/<change-name>/specs/
+changes/<change-name>/specs/
 ```
 
 Each subdirectory is a capability. Each `spec.md` file contains the delta operations.
@@ -61,7 +61,7 @@ Delta operations are marked with headers:
 
 For each capability folder in the delta specs:
 
-1. **Check if a main spec exists**: Look for `workflow/specs/<capability>/spec.md`
+1. **Check if a main spec exists**: Look for `specs/<capability>/spec.md`
 2. **If no main spec exists**: Create one from the ADDED requirements. Copy the full spec structure.
 3. **If a main spec exists**: Apply each operation type:
 
@@ -130,12 +130,12 @@ Before executing any merge, detect these conflicts:
 ## Conflicts Requiring Manual Resolution
 
 ### Conflict: `<requirement-name>` modified by multiple changes
-- Change A: `workflow/changes/feature-x/specs/auth/spec.md`
-- Change B: `workflow/changes/feature-y/specs/auth/spec.md`
+- Change A: `changes/feature-x/specs/auth/spec.md`
+- Change B: `changes/feature-y/specs/auth/spec.md`
 - Resolution needed: Manual merge of both modifications
 
 ### Conflict: RENAMED `<old-name>` → `<new-name>` collides with existing `<new-name>`
-- Affected change: `workflow/changes/<change-name>/specs/<capability>/spec.md`
+- Affected change: `changes/<change-name>/specs/<capability>/spec.md`
 - Resolution needed: Choose unique name or merge requirements
 ```
 

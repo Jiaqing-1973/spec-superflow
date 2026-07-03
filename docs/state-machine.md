@@ -68,7 +68,10 @@
 ## Transitions
 
 ```text
-exploring -> specifying -> bridging -> approved-for-build -> executing -> closing
+  exploring ──── hotfix/tweak ────> bridging          (fast-path)
+  exploring ──── tweak ──────────> approved-for-build (fast-path)
+
+  exploring -> specifying -> bridging -> approved-for-build -> executing -> closing
                 ^              ^             |                 ^    |
                 |              |             v                 |    |
                 |              |         debugging ────────────┘    |

@@ -42,6 +42,16 @@ async function cloneRelease(tag) {
 }
 
 async function copySkills(sourceSkills, targetSkills) {
+  // Clean old skill directories before copying to prevent stale v0.7 names accumulating
+  if (existsSync(targetSkills)) {
+    const oldEntries = readdirSync(targetSkills).filter(name => {
+      const full = join(targetSkills, name);
+      try { return statSync(full).isDirectory(); } catch { return false; }
+    });
+    for (const name of oldEntries) {
+      rmSync(join(targetSkills, name), { recursive: true, force: true });
+    }
+  }
   ensureDir(targetSkills);
   const entries = readdirSync(sourceSkills).filter(name => {
     const full = join(sourceSkills, name);

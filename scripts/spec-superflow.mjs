@@ -45,7 +45,7 @@ Examples:
   ssf config --set verification.language=zh
   ssf state init changes/my-change/
   ssf state check changes/my-change/
-  ssf state transition changes/my-change/ approved
+  ssf state transition changes/my-change/ approved-for-build
   ssf state get changes/my-change/ batches_completed
 `;
 

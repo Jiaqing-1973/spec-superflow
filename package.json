@@ -11,7 +11,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "node --test --experimental-strip-types tests/e2e.test.ts",
+    "test": "node --test --experimental-strip-types tests/e2e.test.ts tests/lib/*.test.*",
     "validate": "node scripts/validate-artifacts"
   },
   "keywords": [

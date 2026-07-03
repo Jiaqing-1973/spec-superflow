@@ -3,7 +3,7 @@ name: contract-builder
 description: Convert approved planning artifacts into an execution contract. Invoke when the user wants to start building, asks to move from planning to implementation, or when `execution-contract.md` is missing or stale.
 ---
 
-# Bridge Contract
+# Contract Builder
 
 This skill is the defining layer of `spec-superflow`.
 
@@ -200,7 +200,7 @@ Reference: `docs/decision-points.md` → DP-3
 
 After `execution-contract.md` is written and validated:
 
-1. Run: `node scripts/spec-superflow.mjs state init <change-dir>`
+1. Run: `node "${CLAUDE_PLUGIN_ROOT}/scripts/spec-superflow.mjs" state init <change-dir>`
 2. This creates `.spec-superflow.yaml` with `artifacts_hash` and `contract_hash`
 3. The state file enables fast staleness detection in subsequent phases
 

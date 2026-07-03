@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
 # SessionStart hook for spec-superflow plugin
-# v0.8.2: inject only a lightweight pointer instead of the full workflow-start
-# skill to reduce per-session context-window usage (see issue #5).
-
-set -euo pipefail
-
-# Lightweight reminder that fits in ~50 tokens. The full workflow-start skill
+# v0.8.4: compact injection (~40 tokens). The full workflow-start skill
 # is loaded on demand when the model invokes it.
-session_context="<EXTREMELY_IMPORTANT>\\nYou have spec-superflow powers. When the user says start, continue, resume, plan, implement, or when the workflow stage is unclear, invoke the spec-superflow:workflow-start skill. Do not write planning artifacts before confirming key decisions with the user.\\n</EXTREMELY_IMPORTANT>"
+session_context="<EXTREMELY_IMPORTANT>\nYou have spec-superflow. Use /spec-superflow:workflow-start before planning or implementing.\n</EXTREMELY_IMPORTANT>"
 
 # Output context injection as JSON.
 # Cursor hooks expect additional_context (snake_case).
@@ -18,14 +13,11 @@ session_context="<EXTREMELY_IMPORTANT>\\nYou have spec-superflow powers. When th
 #
 # Uses printf instead of heredoc to work around bash 5.3+ heredoc hang.
 if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
-  # Cursor sets CURSOR_PLUGIN_ROOT (may also set CLAUDE_PLUGIN_ROOT)
-  printf '{\n  "additional_context": "%s"\n}\n' "$session_context" | cat
+  printf '{\n  "additional_context": "%s"\n}\n' "$session_context"
 elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
-  # Claude Code sets CLAUDE_PLUGIN_ROOT without COPILOT_CLI
-  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context" | cat
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context"
 else
-  # Copilot CLI (sets COPILOT_CLI=1) or unknown platform — SDK standard format
-  printf '{\n  "additionalContext": "%s"\n}\n' "$session_context" | cat
+  printf '{\n  "additionalContext": "%s"\n}\n' "$session_context"
 fi
 
 exit 0

@@ -36,13 +36,16 @@ function hasKeyword(text, patterns) {
 function inferMode(changeDir) {
   const state = readState(changeDir);
 
-  // Explicit override preserved
-  if (state.workflow === 'hotfix' || state.workflow === 'tweak') {
-    return {
-      mode: state.workflow,
-      explicit: true,
-      reason: `workflow explicitly set to '${state.workflow}' in .spec-superflow.yaml; skipping auto-detection`,
-    };
+  // Explicit override: honor any non-auto, non-null workflow value
+  if (state.workflow && state.workflow !== 'auto') {
+    const valid = ['hotfix', 'tweak', 'full'];
+    if (valid.includes(state.workflow)) {
+      return {
+        mode: state.workflow,
+        explicit: true,
+        reason: `workflow explicitly set to '${state.workflow}' in .spec-superflow.yaml; skipping auto-detection`,
+      };
+    }
   }
 
   const proposal = readText(changeDir, 'proposal.md');
@@ -117,6 +120,6 @@ function main() {
 
 export { inferMode };
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.filename === process.argv[1] || import.meta.url === `file://${process.argv[1]}`) {
   main();
 }

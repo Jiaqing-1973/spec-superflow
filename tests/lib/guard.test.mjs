@@ -56,8 +56,8 @@ describe('guard: transition matrix', () => {
     assert.ok(dims.includes('schema-valid'));
   });
 
-  it('bridging→approved requires artifacts-exist + schema-valid + contract-fresh', () => {
-    const result = runGuard('bridging', 'approved');
+  it('bridging→approved-for-build requires artifacts-exist + schema-valid + contract-fresh', () => {
+    const result = runGuard('bridging', 'approved-for-build');
     // contract-fresh may fail since no contract exists, but the check should run
     const dims = result.output.checks.map(c => c.dimension);
     assert.ok(dims.includes('artifacts-exist'));

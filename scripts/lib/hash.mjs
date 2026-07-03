@@ -17,13 +17,14 @@ export function computeArtifactsHash(changeDir) {
   }
 
   // specs/*/spec.md (sorted for deterministic output)
+  // Only hash spec.md files — exclude README.md, design-notes.md, etc.
   const specsDir = path.join(changeDir, 'specs');
   if (fs.existsSync(specsDir)) {
     const specFiles = [];
     walkDir(specsDir, specFiles);
     specFiles.sort();
     for (const f of specFiles) {
-      if (f.endsWith('.md')) {
+      if (path.basename(f) === 'spec.md') {
         hash.update(fs.readFileSync(f, 'utf-8'));
         hasContent = true;
       }

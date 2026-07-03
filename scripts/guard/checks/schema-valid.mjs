@@ -7,10 +7,14 @@ let _Validator = null;
 
 async function getValidator() {
   if (_Validator) return _Validator;
-  const distPath = new URL('../../../dist/index.js', import.meta.url).pathname;
-  const mod = await import(distPath);
-  _Validator = mod.Validator;
-  return _Validator;
+  try {
+    const distPath = new URL('../../../dist/index.js', import.meta.url).pathname;
+    const mod = await import(distPath);
+    _Validator = mod.Validator;
+    return _Validator;
+  } catch (err) {
+    throw new Error(`Failed to load Validator engine. Run 'npm run build' first. Original error: ${err.message}`);
+  }
 }
 
 /**
@@ -19,6 +23,7 @@ async function getValidator() {
  */
 export async function checkSchemaValid(changeDir) {
   const failures = [];
+  const warnings = [];
   const Validator = await getValidator();
   const validator = new Validator();
 
@@ -28,11 +33,11 @@ export async function checkSchemaValid(changeDir) {
     const content = fs.readFileSync(proposalPath, 'utf-8');
     const changeName = path.basename(changeDir);
     const report = validator.validateChangeContent(changeName, content);
-    if (!report.valid) {
-      for (const issue of report.issues) {
-        if (issue.level === 'ERROR') {
-          failures.push(`proposal.md: ${issue.message}`);
-        }
+    for (const issue of report.issues) {
+      if (issue.level === 'ERROR') {
+        failures.push(`proposal.md: ${issue.message}`);
+      } else if (issue.level === 'WARNING') {
+        warnings.push(`proposal.md: ${issue.message}`);
       }
     }
   }
@@ -46,11 +51,11 @@ export async function checkSchemaValid(changeDir) {
         if (fs.existsSync(specFile)) {
           const content = fs.readFileSync(specFile, 'utf-8');
           const report = validator.validateDeltaSpec(content);
-          if (!report.valid) {
-            for (const issue of report.issues) {
-              if (issue.level === 'ERROR') {
-                failures.push(`specs/${entry.name}/spec.md: ${issue.message}`);
-              }
+          for (const issue of report.issues) {
+            if (issue.level === 'ERROR') {
+              failures.push(`specs/${entry.name}/spec.md: ${issue.message}`);
+            } else if (issue.level === 'WARNING') {
+              warnings.push(`specs/${entry.name}/spec.md: ${issue.message}`);
             }
           }
         }
@@ -58,5 +63,5 @@ export async function checkSchemaValid(changeDir) {
     }
   }
 
-  return { pass: failures.length === 0, failures };
+  return { pass: failures.length === 0, failures, warnings };
 }

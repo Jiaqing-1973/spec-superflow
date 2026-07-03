@@ -13,7 +13,7 @@ export function checkTasksComplete(changeDir) {
   }
 
   const content = fs.readFileSync(tasksPath, 'utf-8');
-  const unchecked = content.match(/^- \[ \]/gm);
+  const unchecked = content.match(/^[ \t]*- \[ \]/gm);
 
   if (unchecked && unchecked.length > 0) {
     return {
@@ -22,7 +22,7 @@ export function checkTasksComplete(changeDir) {
     };
   }
 
-  const hasAny = content.match(/^- \[x\]/gm);
+  const hasAny = content.match(/^[ \t]*- \[[xX]\]/gm);
   if (!hasAny) {
     return { pass: false, failures: ['tasks.md: no completed tasks found'] };
   }

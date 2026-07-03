@@ -187,11 +187,8 @@ function writeFile(filePath, content) {
 
 const PLATFORM_WRITERS = {
   claude(base, projectRoot) {
-    const rulesDir = join(projectRoot, 'rules');
     const alwaysDir = join(projectRoot, '.claude', 'always');
-    mkdirSync(rulesDir, { recursive: true });
     mkdirSync(alwaysDir, { recursive: true });
-    writeFileSync(join(rulesDir, 'phase-guard.md'), base);
     writeFileSync(join(alwaysDir, 'phase-guard.md'), base);
   },
   cursor(base, projectRoot) {

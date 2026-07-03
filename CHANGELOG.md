@@ -4,6 +4,48 @@ All notable changes to `spec-superflow` will be documented in this file.
 
 The format loosely follows Keep a Changelog.
 
+## [0.8.4] - 2026-07-03
+
+### Fixed (Bug)
+
+- **Critical: C-1** — Validator bilingual heading support: `extractSection` regex now matches both `## Why` and `## 背景（Why）` style headings. Chinese templates no longer fail schema validation.
+- **Critical: C-2** — Guard dead transition `bridging:approved` fixed to `bridging:approved-for-build` (matching canonical state name).
+- **Critical: C-3** — Cursor workflow-orchestrator guard call fixed to use `approved-for-build` instead of `approved`, preventing "Unknown transition" errors.
+- **High: H-1** — Guard transition matrix extended with 6 missing rewind transitions (`specifying:exploring`, `bridging:specifying`, `approved-for-build:bridging`, `executing:specifying`, `executing:bridging`, `closing:specifying`).
+- **High: H-2** — `ssf state transition` now runs guard checks before writing state. Guard is no longer bypassable via direct CLI.
+- **High: H-3** — `tasks-complete.mjs` now matches both `[x]` and `[X]` (case-insensitive) and supports indented/nested tasks (`[ \t]*` prefix).
+- **High: H-4** — `build-executor` SKILL.md: 3 script paths fixed to use `${CLAUDE_PLUGIN_ROOT}` prefix, preventing breakage after worktree `cd`.
+- **High: H-5** — `spec-merger` SKILL.md: removed non-existent `workflow/` path prefix from 7 spec locations.
+- **High: H-6** — `infer-workflow.mjs`: fixed `import.meta.url` comparison for relative-path invocation (added `import.meta.filename` fallback for Node 22+).
+- **High: H-7** — `cmd-state.mjs` transition now validates state names against `VALID_STATES` whitelist, rejecting typos that corrupt the state machine.
+- **Medium: M-1** — 6 skill H1 titles updated from v0.7 old names to v0.8.x current names (e.g., "Spec Explorer" → "Need Explorer").
+- **Medium: M-2** — `state-loader.mjs`: `||` replaced with `??` across 10 fields, preventing empty string → null data loss.
+- **Medium: M-3** — `hash.mjs`: specs hash now only includes `spec.md` files (not all `.md` files), preventing false hash mismatch from README.md changes.
+- **Medium: M-4** — `schema-valid.mjs`: WARNING-level issues now captured and returned alongside ERRORs instead of being silently discarded.
+- **Medium: M-6** — `schema-valid.mjs`: dynamic `import()` now wrapped in try/catch with helpful "Run 'npm run build'" error message.
+- **Medium: M-7** — `infer-workflow.mjs`: explicit `workflow: full` no longer overridden by auto-detection heuristic.
+- **Medium: M-8** — `workflow-start` SKILL.md: 8 relative script paths fixed to use `${CLAUDE_PLUGIN_ROOT}` prefix.
+- **Medium: M-9** — `cmd-state.mjs` SETTABLE_FIELDS extended with 25 missing fields (`batches_completed`, `dp_0_result`, `dp_N_decisions`, `dp_N_confirmed` for DP-1 through DP-7).
+- **Medium: M-10** — `bug-investigator` SKILL.md: added DP-5 (调试升级) reference near 3+ failure escalation rule.
+- **Low: L-1** — `CLAUDE.md` ASCII state diagram: `approved` → `approved-for-build`.
+- **Low: L-2** — `spec-superflow.mjs` CLI help: example uses `approved-for-build` instead of `approved`.
+- **Low: L-3** — `cmd-state.mjs` get: blocks prototype property reads (`__proto__`, `constructor`, etc.).
+- **Low: L-4** — `cmd-state.mjs` init: auto-creates change directory if missing.
+- **Low: L-7** — `docs/state-machine.md`: added fast-path transitions (`exploring→bridging`, `exploring→approved-for-build`).
+
+### Changed (Token Optimization)
+
+- **T-1** — `session-start` hook injection reduced from ~100 tokens to ~40 tokens (~60% reduction). Removed `set -euo pipefail` and no-op `| cat` pipes.
+- **T-2** — `install-cursor.mjs`: now cleans old skill directories before copying, preventing stale v0.7 names from accumulating.
+- **T-3** — `cmd-inject.mjs`: `claude` platform writer no longer writes duplicate `rules/phase-guard.md` (`.claude/always/phase-guard.md` suffices).
+- **T-4** — `.cursor/skills/`: removed 8 stale v0.7 skill directories (spec-explorer, spec-forger, spec-syncer, bridge-contract, execution-governor, systematic-debugger, closure-archivist, workflow-orchestrator). Now has only 9 current skills.
+- **T-5** — Deleted stale `rules/phase-guard.md` file.
+
+### Changed (Internal)
+
+- `package.json` test script now runs all 152 tests (e2e + lib), not just e2e.
+- Guard test updated for `bridging→approved-for-build` transition name.
+
 ## [0.8.3] - 2026-07-01
 
 ### Added

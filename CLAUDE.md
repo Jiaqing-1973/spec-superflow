@@ -73,7 +73,7 @@ Nine skills that operate as a state machine. Each skill is a directory containin
 Seven primary states plus a debugging side-path from `executing`:
 
 ```text
-exploring → specifying → bridging → approved → executing → closing
+exploring → specifying → bridging → approved-for-build → executing → closing
                 ↑           ↑            |          ↑     |
                 |           |            v          |     |
                 |           |        debugging ─────┘     |

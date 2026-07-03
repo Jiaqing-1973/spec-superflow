@@ -3,7 +3,7 @@ name: release-archivist
 description: Close out a spec-superflow change with verification, summary, and archive readiness. Invoke when implementation is complete, verification is underway, or the user asks for a final wrap-up.
 ---
 
-# Closure Archivist
+# Release Archivist
 
 Use this skill to finish a `spec-superflow` change cleanly.
 

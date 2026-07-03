@@ -9,15 +9,28 @@ import { checkContractFresh } from './checks/contract-fresh.mjs';
 
 // Transition matrix: <from>:<to> → required check dimensions
 const TRANSITION_CHECKS = {
-  'exploring:specifying': ['artifacts-exist'],
-  'specifying:bridging':  ['artifacts-exist', 'schema-valid'],
-  'bridging:approved':    ['artifacts-exist', 'schema-valid', 'contract-fresh'],
+  // Forward transitions
+  'exploring:specifying':           ['artifacts-exist'],
+  'specifying:bridging':            ['artifacts-exist', 'schema-valid'],
+  'bridging:approved-for-build':    ['artifacts-exist', 'schema-valid', 'contract-fresh'],
   'approved-for-build:executing':   ['artifacts-exist', 'contract-fresh'],
-  'executing:closing':    ['tasks-complete', 'tests-passing'],
-  'executing:debugging':  [],
-  'debugging:executing':  ['contract-fresh'],
-  'exploring:bridging':   ['artifacts-exist'],
+  'executing:closing':              ['tasks-complete', 'tests-passing'],
+
+  // Debugging side-path
+  'executing:debugging':            [],
+  'debugging:executing':            ['contract-fresh'],
+
+  // Fast-path transitions (hotfix / tweak)
+  'exploring:bridging':             ['artifacts-exist'],
   'exploring:approved-for-build':   ['artifacts-exist'],
+
+  // Rewind transitions (scope change, contract drift, verification failure)
+  'specifying:exploring':           [],
+  'bridging:specifying':            [],
+  'approved-for-build:bridging':    [],
+  'executing:specifying':           [],
+  'executing:bridging':             [],
+  'closing:specifying':             [],
 };
 
 function applyWorkflowMode(checks, workflow) {
@@ -55,7 +68,7 @@ async function main() {
   const changeDir = positionals[1];
   const fromState = positionals[2];
   const toState = positionals[3];
-  const useJson = process.argv.includes('--json');
+  const useJson = values.json;
   const workflow = values.workflow;
 
   const VALID_WORKFLOWS = ['full', 'hotfix', 'tweak'];
