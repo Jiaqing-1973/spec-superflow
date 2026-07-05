@@ -141,7 +141,10 @@ describe('cmd-state: transition', () => {
 
     const result = ssf(`state transition ${tempDir} approved-for-build`);
     assert.equal(result.exitCode, 1);
-    assert.match(result.stderr || result.stdout, /workflow-mode|fast-path|tweak/i);
+    const output = result.stderr || result.stdout;
+    assert.match(output, /workflow-mode/i);
+    assert.match(output, /fast-path/i);
+    assert.match(output, /tweak/i);
 
     const check = ssf(`state get ${tempDir} state`);
     assert.equal(check.stdout.trim(), 'exploring');
@@ -154,7 +157,11 @@ describe('cmd-state: transition', () => {
 
     const result = ssf(`state transition ${tempDir} bridging`);
     assert.equal(result.exitCode, 1);
-    assert.match(result.stderr || result.stdout, /workflow-mode|fast-path|hotfix|tweak/i);
+    const output = result.stderr || result.stdout;
+    assert.match(output, /workflow-mode/i);
+    assert.match(output, /fast-path/i);
+    assert.match(output, /hotfix/i);
+    assert.match(output, /tweak/i);
 
     const check = ssf(`state get ${tempDir} state`);
     assert.equal(check.stdout.trim(), 'exploring');
