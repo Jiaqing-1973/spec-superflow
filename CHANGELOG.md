@@ -4,6 +4,12 @@ All notable changes to `spec-superflow` will be documented in this file.
 
 The format loosely follows Keep a Changelog.
 
+## [0.8.11] - 2026-07-06
+
+### Fixed
+
+- **DP-0 audit consistency** — `ssf audit` now treats existing `dp_0_confirmed: true` state as a recorded DP-0 confirmation, and `dp_0_result` is now persisted by the state loader instead of being dropped after `ssf state set`.
+
 ## [0.8.10] - 2026-07-06
 
 ### Fixed
