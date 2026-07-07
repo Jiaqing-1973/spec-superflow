@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: hashgraph-online/ai-plugin-scanner-action@c4737ed2f724bb612bd7df8c63f6835dd34181a3 # v1.2.392 / plugin-scanner 2.0.992 — pinned. TODO: bump forward once shell-injection findings are cleaned up.
@@ -18,7 +19,7 @@ jobs:
           plugin_dir: "."
           fail_on_severity: high
           format: sarif
-          upload_sarif: false
+          upload_sarif: true
       - name: Dump SARIF (diagnostic — find file:line of findings)
         if: always()
         run: |
