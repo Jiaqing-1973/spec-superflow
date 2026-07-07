@@ -20,10 +20,12 @@ export async function run(args) {
     process.exit(2);
   }
   const extra = values.force ? ['--force'] : [];
-  // Literal command ('node') + argument array, no shell — same safe form as
-  // cmd-install-*.mjs. execFileSync throws on non-zero exit; propagate its status.
+  // Literal command ('node') + literal argument array, no shell — same safe form
+  // as cmd-install-*.mjs. execFileSync throws on non-zero exit; propagate its status.
+  const nodeArgs = [ENSURE, changeDir, changeName];
+  for (const a of extra) nodeArgs.push(a);
   try {
-    execFileSync('node', [ENSURE, changeDir, changeName, ...extra], {
+    execFileSync('node', nodeArgs, {
       stdio: 'inherit',
       timeout: 15000,
     });
