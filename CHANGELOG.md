@@ -4,6 +4,20 @@ All notable changes to `spec-superflow` will be documented in this file.
 
 The format loosely follows Keep a Changelog.
 
+## [0.8.15] - 2026-07-07
+
+### Fixed
+
+- **BUG-A（致命）— `executing→closing` 收口跳转永久失败**：`release-archivist` 从不写 `test_result: pass`，而 `tests-passing` 守卫强制要求它，导致 `ssf state transition closing` 永远 `exit(1)`。现守卫同时接受 `dp_6_result` 以 `pass` 开头，且 `release-archivist` 在 DP-6 后显式执行 `ssf state set <change-dir> test_result pass`。
+- **BUG-B — 状态漂移**：`cmd-state` 非 init 子命令在 `.spec-superflow.yaml` 缺失时静默返回默认态、会幽灵式创建状态文件。现缺失即报错退出；`state-loader` 增加 `spec_merged: false` 默认值并持久化。
+- **#28 — `executing→closing` 缺「spec 已合并」闸门**：新增 `specs-merged` 守卫，残留未合并的 delta spec 会阻断收口；`spec-merger` 同步后置 `spec_merged: true`。
+- **#15 — git 隔离仅为建议性、无强制**：新增 `ensure-branch.mjs` + `cmd-isolate.mjs`，拒绝在 `main`/`master` 上直接提交（除非 `--force`）；`build-executor` 的 `ssf isolate` 改为强制 pre-flight。
+- **#26 / #27.2 — skill 依赖 PATH 解析的裸 `ssf`**：所有 `skills/**/SKILL.md` 改为安装时重写的绝对路径 `node "${CLAUDE_PLUGIN_ROOT}/scripts/spec-superflow.mjs"`，修复 cursor / marketplace 用户必失败的问题。
+
+### Added
+
+- **#29 — ZCODE（gemini-cli）安装器**：新增 `install-zcode.mjs` + `cmd-install-zcode.mjs`，注册进 CLI；`INSTALL.md` 平台表补充 ZCODE 行。
+
 ## [0.8.14] - 2026-07-06
 
 ### Fixed

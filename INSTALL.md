@@ -7,7 +7,7 @@
 - [Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec) — 规划引擎（Schema 验证、Delta Spec、工件解析）
 - [obra/superpowers](https://github.com/obra/superpowers) — 执行纪律（TDD 铁律、SDD、系统化调试、代码审查）
 
-当前发布版本：**v0.8.14**。
+当前发布版本：**v0.8.15**。
 
 ---
 
@@ -32,6 +32,7 @@
 | Roo Code | `ssf install-roocode` | 重新运行脚本 | 删除 `.roo/skills/`、`.roo/rules/` |
 | Continue | `ssf install-continue` | 重新运行脚本 | 删除 `.continue/skills/`、`.continue/rules/` |
 | Pi | `ssf install-pi` | 重新运行脚本 | 删除 `.pi/skills/` |
+| ZCODE | `ssf install-zcode` | 重新运行脚本 | 删除 `.zcode/skills/`、`.zcode/rules/` |
 
 ---
 
