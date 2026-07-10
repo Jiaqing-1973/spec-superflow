@@ -5,10 +5,18 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 let tempDir;
 const GUARD_PATH = join(process.cwd(), 'scripts/guard/guard.mjs');
+const CLI_PATH = join(process.cwd(), 'scripts/spec-superflow.mjs');
+
+function runNodeScript(scriptPath, args) {
+  return execFileSync(process.execPath, [scriptPath, ...args], {
+    encoding: 'utf-8',
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
+}
 
 describe('guard: transition matrix', () => {
   before(() => {
@@ -27,10 +35,8 @@ describe('guard: transition matrix', () => {
 
   function runGuard(fromState, toState, opts = '') {
     try {
-      const result = execSync(
-        `node ${GUARD_PATH} check ${tempDir} ${fromState} ${toState} --json ${opts}`,
-        { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
-      );
+      const extraArgs = opts ? opts.split(/\s+/).filter(Boolean) : [];
+      const result = runNodeScript(GUARD_PATH, ['check', tempDir, fromState, toState, '--json', ...extraArgs]);
       return { exitCode: 0, output: JSON.parse(result.trim()) };
     } catch (err) {
       if (err.stdout) {
@@ -116,10 +122,7 @@ describe('guard: workflow mode behavior', () => {
 
   function runGuardWithMode(fromState, toState, workflow) {
     try {
-      const result = execSync(
-        `node ${GUARD_PATH} check ${tempDir} ${fromState} ${toState} --json --workflow ${workflow}`,
-        { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
-      );
+      const result = runNodeScript(GUARD_PATH, ['check', tempDir, fromState, toState, '--json', '--workflow', workflow]);
       return { exitCode: 0, output: JSON.parse(result.trim()) };
     } catch (err) {
       if (err.stdout) {
@@ -169,10 +172,7 @@ describe('guard: hotfix minimal contract', () => {
 
   function run(fromState, toState) {
     try {
-      const stdout = execSync(
-        `node ${GUARD_PATH} check ${dir} ${fromState} ${toState} --json --workflow hotfix`,
-        { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
-      );
+      const stdout = runNodeScript(GUARD_PATH, ['check', dir, fromState, toState, '--json', '--workflow', 'hotfix']);
       return { exitCode: 0, output: JSON.parse(stdout.trim()) };
     } catch (err) {
       if (err.stdout) {
@@ -185,8 +185,8 @@ describe('guard: hotfix minimal contract', () => {
 
   function prepareFreshHotfixState() {
     writeFileSync(join(dir, 'execution-contract.md'), '# Execution Contract\n\n## Intent Lock\n\nHotfix contract.\n');
-    execSync(`node ${join(process.cwd(), 'scripts/spec-superflow.mjs')} state init ${dir}`);
-    execSync(`node ${join(process.cwd(), 'scripts/spec-superflow.mjs')} state set ${dir} workflow hotfix`);
+    runNodeScript(CLI_PATH, ['state', 'init', dir]);
+    runNodeScript(CLI_PATH, ['state', 'set', dir, 'workflow', 'hotfix']);
   }
 
   it('allows exploring to bridging without full planning artifacts', () => {
@@ -210,7 +210,7 @@ describe('guard: hotfix minimal contract', () => {
 
   it('rejects bridging to approved-for-build when DP-3 is recorded but not approved', () => {
     prepareFreshHotfixState();
-    execSync(`node ${join(process.cwd(), 'scripts/spec-superflow.mjs')} state set ${dir} dp_3_result rejected`);
+    runNodeScript(CLI_PATH, ['state', 'set', dir, 'dp_3_result', 'rejected']);
     const result = run('bridging', 'approved-for-build');
     assert.equal(result.exitCode, 1);
     const dp3Check = result.output.checks.find(c => c.dimension === 'dp3-approved');
@@ -220,14 +220,14 @@ describe('guard: hotfix minimal contract', () => {
 
   it('allows bridging to approved-for-build with fresh contract and DP-3', () => {
     prepareFreshHotfixState();
-    execSync(`node ${join(process.cwd(), 'scripts/spec-superflow.mjs')} state set ${dir} dp_3_result approved`);
+    runNodeScript(CLI_PATH, ['state', 'set', dir, 'dp_3_result', 'approved']);
     const result = run('bridging', 'approved-for-build');
     assert.equal(result.exitCode, 0, JSON.stringify(result.output));
   });
 
   it('allows approved-for-build to executing with fresh contract and approved DP-3', () => {
     prepareFreshHotfixState();
-    execSync(`node ${join(process.cwd(), 'scripts/spec-superflow.mjs')} state set ${dir} dp_3_result approved: user confirmed minimal contract`);
+    runNodeScript(CLI_PATH, ['state', 'set', dir, 'dp_3_result', 'approved: user confirmed minimal contract']);
     const result = run('approved-for-build', 'executing');
     assert.equal(result.exitCode, 0, JSON.stringify(result.output));
     const dims = result.output.checks.map(c => c.dimension);
@@ -246,10 +246,7 @@ describe('guard: artifacts-exist check', () => {
 
   function runGuard(fromState, toState) {
     try {
-      const result = execSync(
-        `node ${GUARD_PATH} check ${tempDir} ${fromState} ${toState} --json`,
-        { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
-      );
+      const result = runNodeScript(GUARD_PATH, ['check', tempDir, fromState, toState, '--json']);
       return { exitCode: 0, output: JSON.parse(result.trim()) };
     } catch (err) {
       if (err.stdout) {
