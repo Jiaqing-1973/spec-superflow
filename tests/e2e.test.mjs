@@ -15,7 +15,7 @@ import {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const EXAMPLES_DIR = resolve(__dirname, '../docs/examples');
 
-function readExample(...parts: string[]): string {
+function readExample(...parts) {
   return readFileSync(resolve(EXAMPLES_DIR, ...parts), 'utf-8');
 }
 
@@ -145,8 +145,8 @@ describe('Validator.validateImplementation', () => {
     );
     const completeness = report.dimensions.find(d => d.name === 'Completeness');
     assert.ok(completeness);
-    assert.equal(completeness!.status, 'FAIL');
-    assert.ok(completeness!.findings.some(f => f.message.includes('Rate limiting')));
+    assert.equal(completeness.status, 'FAIL');
+    assert.ok(completeness.findings.some(f => f.message.includes('Rate limiting')));
   });
 
   it('detects placeholder markers in diff (Correctness FAIL)', () => {
@@ -156,7 +156,7 @@ describe('Validator.validateImplementation', () => {
       '## Decisions\n### Decision 1\n- Choice: JWT\n- Rationale: stateless'
     );
     const correctness = report.dimensions.find(d => d.name === 'Correctness');
-    assert.equal(correctness!.status, 'FAIL');
+    assert.equal(correctness.status, 'FAIL');
   });
 
   it('passes when all requirements covered and no placeholders', () => {
@@ -175,7 +175,7 @@ describe('Validator.validateImplementation', () => {
       '## Decisions\n### Decision 1\n- Choice: JWT-based auth\n- Rationale: stateless'
     );
     const coherence = report.dimensions.find(d => d.name === 'Coherence');
-    assert.ok(coherence!.findings.length > 0);
+    assert.ok(coherence.findings.length > 0);
   });
 
   it('verifies Chinese spec content with Chinese tokenizer', () => {
@@ -186,7 +186,7 @@ describe('Validator.validateImplementation', () => {
     );
     const completeness = report.dimensions.find(d => d.name === 'Completeness');
     assert.ok(completeness, 'Missing Completeness dimension');
-    assert.equal(completeness!.status, 'PASS', `Expected PASS but got ${completeness!.status}: ${JSON.stringify(completeness!.findings)}`);
+    assert.equal(completeness.status, 'PASS', `Expected PASS but got ${completeness.status}: ${JSON.stringify(completeness.findings)}`);
   });
 
   it('detects missing requirement in Chinese spec (Completeness FAIL)', () => {
@@ -196,8 +196,8 @@ describe('Validator.validateImplementation', () => {
       '## Decisions\n### Decision 1\n- Choice: 令牌桶算法\n- Rationale: 平滑限流'
     );
     const completeness = report.dimensions.find(d => d.name === 'Completeness');
-    assert.equal(completeness!.status, 'FAIL');
-    assert.ok(completeness!.findings.some(f => f.message.includes('速率限制')));
+    assert.equal(completeness.status, 'FAIL');
+    assert.ok(completeness.findings.some(f => f.message.includes('速率限制')));
   });
 });
 
